@@ -4,8 +4,8 @@ document.querySelectorAll(".numbers").forEach(function (item) {
     item.addEventListener("click", function (e) {
         const value = e.target.innerHTML.trim();
 
-        // Kalau input masih 0 atau error, reset dulu
-        if (inputValue.innerText === "0" || inputValue.innerText === "Error") {
+        // kalau input masih 0 atau error, reset dulu
+        if (["Error", "Deri", "NaN", "Infinity", "0", "undefined"].includes(inputValue.innerText)) {
             inputValue.innerText = "";
         }
 
@@ -36,26 +36,44 @@ document.querySelectorAll(".operations").forEach(function (item) {
                 inputValue.innerText = "Deri";
             } else {
                 try {
-                inputValue.innerText = new Function("return " + inputValue.innerText)();
+                    inputValue.innerText = new Function("return " + inputValue.innerText)();
                 } catch {
-                inputValue.innerText = "Error";
+                    inputValue.innerText = "Error";
                 }
             }
-        // jika ac
+            // jika ac
         } else if (operation === "AC") {
             inputValue.innerText = "0";
-        // jika del
+            // jika del
         } else if (operation === "DEL") {
-            if (["Error", "Deri", "NaN"].includes(inputValue.innerText)) {
+            if (["Error", "Deri", "NaN", "Infinity", "undefined"].includes(inputValue.innerText)) {
                 inputValue.innerText = "0";
             } else {
                 inputValue.innerText = inputValue.innerText.slice(0, -1) || "0";
             }
+            // kurang dan special case angka negatif
+        } else if (operation === "-") {
+            if (["Error", "Deri", "NaN", "Infinity", "0", "undefined"].includes(inputValue.innerText)) {
+                inputValue.innerText = operation;
+            } else if (/\d$/.test(inputValue.innerText) || ("+-*/%".includes(lastChar))){
+                if (("+-*/%".includes(lastChar))) {
+                    inputValue.innerText = inputValue.innerText.slice(0, -1) + operation;
+                } else {
+                    inputValue.innerText += operation;
+                }
+            } else return;
         } else {
-                // input oprator dan filter
-                if (!/\d$/.test(inputValue.innerText) || ("+-*/%".includes(lastChar) && "+-*/%".includes(operation))) return;
-
-                inputValue.innerText += operation;
+                // sisanya
+            if (/\d$/.test(inputValue.innerText) || ("+-*/%".includes(lastChar))) {
+                if (("+*/%".includes(lastChar))) {
+                    inputValue.innerText = inputValue.innerText.slice(0, -1) + operation;
+                } else if (lastChar === "-") {
+                    if (inputValue.innerText.slice(0, -1) === "") return; 
+                    inputValue.innerText = inputValue.innerText.slice(0, -1) + operation;
+                } else {
+                    inputValue.innerText += operation;
+                }
+            } else return;
             }
     });
 });
